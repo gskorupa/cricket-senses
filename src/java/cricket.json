@@ -6,10 +6,25 @@
             "@type": "org.cricketmsf.config.Configuration",
             "service": "org.cricketmsf.sensesservice.Service",
             "host": "0.0.0.0",
-            "port": "8080",
+            "port": "8090",
             "threads": 0,
             "filter": "org.cricketmsf.SecurityFilter",
             "adapters": {
+                "StoreClient": {
+                    "name": "StoreClient",
+                    "interfaceName": "StoreClientIface",
+                    "classFullName": "org.cricketmsf.sensesservice.out.StoreClient",
+                    "properties": {
+                        "url": "http://localhost:8080/echo"
+                    }
+                },
+                "TemperatureReader": {
+                    "name": "TemperatureReader",
+                    "interfaceName": "TemperatureReaderIface",
+                    "classFullName": "org.cricketmsf.sensesservice.out.TemperatureReader",
+                    "properties": {
+                    }
+                },
                 "EchoHttpAdapterIface": {
                     "name": "EchoHttpAdapterIface",
                     "interfaceName": "EchoHttpAdapterIface",

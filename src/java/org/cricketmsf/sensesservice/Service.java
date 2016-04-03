@@ -32,6 +32,10 @@ import org.cricketmsf.in.scheduler.SchedulerIface;
 import org.cricketmsf.out.db.KeyValueCacheAdapterIface;
 import org.cricketmsf.out.html.HtmlReaderAdapterIface;
 import org.cricketmsf.out.log.LoggerAdapterIface;
+import org.cricketmsf.sensesservice.out.StoreClientIface;
+import org.cricketmsf.sensesservice.out.StoreResult;
+import org.cricketmsf.sensesservice.out.TemperatureReader;
+import org.cricketmsf.sensesservice.out.TemperatureReaderIface;
 
 /**
  * EchoService
@@ -47,6 +51,9 @@ public class Service extends Kernel {
     SchedulerIface scheduler = null;
     HtmlGenAdapterIface htmlAdapter = null;
     HtmlReaderAdapterIface htmlReaderAdapter = null;
+    // 
+    StoreClientIface storeClient = null;
+    TemperatureReaderIface temperatureReader = null;
 
     @Override
     public void getAdapters() {
@@ -56,11 +63,39 @@ public class Service extends Kernel {
         scheduler = (SchedulerIface) getRegistered("SchedulerIface");
         htmlAdapter = (HtmlGenAdapterIface) getRegistered("HtmlGenAdapterIface");
         htmlReaderAdapter = (HtmlReaderAdapterIface) getRegistered("HtmlReaderAdapterIface");
+        storeClient = (StoreClientIface) getRegistered("StoreClient");
+        temperatureReader = (TemperatureReaderIface) getRegistered("TemperatureReader");
+    }
+
+    @Override
+    public void runInitTasks() {
+        if (!scheduler.isRestored()) {
+            String delay = "+10s";
+            scheduler.handleEvent(new Event("Sensor", "savedata", "", delay, ""));
+        }
+    }
+    
+    @EventHook(eventCategory = "savedata")
+    public void checkSensors(Event event) {
+        if (event.getTimePoint() != null) {
+            scheduler.handleEvent(event);
+        } else {
+            //get temperature
+            String data=temperatureReader.read().toPostParams();
+            StoreResult result;
+            result=storeClient.sendData(data);
+            System.out.println(result.getCode() + " " + result.getContent());
+            scheduler.handleEvent(new Event("Sensor", "savedata", "", "+10s", ""));
+        }
+        //does nothing
     }
 
     @Override
     public void runOnce() {
         super.runOnce();
+        //System.out.print("Sending data ...");
+        //StoreResult r = storeClient.sendData("t1=21,5&d1=1.04.2016&cn=station1");
+        //System.out.println(r.getCode() + " " + r.getContent());
         System.out.println("Hello from Service.runOnce()");
     }
 
@@ -80,21 +115,6 @@ public class Service extends Kernel {
 
     @HttpAdapterHook(adapterName = "EchoHttpAdapterIface", requestMethod = "GET")
     public Object doGetEcho(Event requestEvent) {
-        return sendEcho((RequestObject) requestEvent.getPayload());
-    }
-
-    @HttpAdapterHook(adapterName = "EchoHttpAdapterIface", requestMethod = "POST")
-    public Object doPost(Event requestEvent) {
-        return sendEcho((RequestObject) requestEvent.getPayload());
-    }
-
-    @HttpAdapterHook(adapterName = "EchoHttpAdapterIface", requestMethod = "PUT")
-    public Object doPut(Event requestEvent) {
-        return sendEcho((RequestObject) requestEvent.getPayload());
-    }
-
-    @HttpAdapterHook(adapterName = "EchoHttpAdapterIface", requestMethod = "DELETE")
-    public Object doDelete(Event requestEvent) {
         return sendEcho((RequestObject) requestEvent.getPayload());
     }
 
