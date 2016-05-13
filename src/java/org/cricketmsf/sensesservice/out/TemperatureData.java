@@ -98,4 +98,14 @@ public class TemperatureData {
         this.clientIp = clientIp;
     }
     
+    public String toString(){
+        StringBuffer sb=new StringBuffer();
+        sb.append(getSensorName());
+        sb.append(",");
+        sb.append(getDate());
+        sb.append(",");
+        sb.append(getTemperature());
+        return sb.toString();
+    }
+    
 }

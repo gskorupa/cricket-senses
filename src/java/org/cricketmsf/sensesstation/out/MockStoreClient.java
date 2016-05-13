@@ -21,6 +21,7 @@ import java.util.HashMap;
 import org.cricketmsf.Adapter;
 import org.cricketmsf.Event;
 import org.cricketmsf.Kernel;
+import org.cricketmsf.in.http.StandardResult;
 import org.cricketmsf.out.OutboundAdapter;
 import org.cricketmsf.sensesservice.out.StoreResult;
 import org.cricketmsf.sensesservice.out.TemperatureData;
@@ -41,13 +42,13 @@ public class MockStoreClient extends OutboundAdapter implements StoreClientIface
     }
 
     @Override
-    public StoreResult sendData(ArrayList<TemperatureData> data) {
+    public StandardResult sendData(ArrayList<TemperatureData> data) {
         long startPoint = System.currentTimeMillis();
-        StoreResult result=new StoreResult();
+        StandardResult result=new StandardResult();
         result.setCode(HttpURLConnection.HTTP_OK);
-        result.setContent("");
-        result.setContentLength(0);
-        result.setResponseTime(System.currentTimeMillis() - startPoint);
+        //result.setContent("");
+        //result.setContentLength(0);
+        //result.setResponseTime(System.currentTimeMillis() - startPoint);
         Kernel.handle(Event.logInfo("MockStoreClient", data.toString()));
         return result;
     }

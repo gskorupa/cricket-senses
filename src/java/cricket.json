@@ -88,8 +88,8 @@
             "adapters": {
                 "StoreClient": {
                     "name": "StoreClient",
-                    "interfaceName": "StoreClientIface",
-                    "classFullName": "org.cricketmsf.sensesstation.out.StoreClient",
+                    "interfaceName": "OutboundHttpAdapterIface",
+                    "classFullName": "org.cricketmsf.sensesstation.out.OutbondHttpAdapter",
                     "properties": {
                         "url": "http://localhost:8090/api"
                     }

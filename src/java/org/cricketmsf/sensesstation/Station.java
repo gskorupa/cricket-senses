@@ -27,9 +27,8 @@ import org.cricketmsf.in.http.StandardResult;
 import org.cricketmsf.in.scheduler.SchedulerIface;
 import org.cricketmsf.out.db.KeyValueCacheAdapterIface;
 import org.cricketmsf.out.log.LoggerAdapterIface;
-import org.cricketmsf.sensesservice.out.StoreResult;
 import org.cricketmsf.sensesservice.out.TemperatureData;
-import org.cricketmsf.sensesstation.out.StoreClientIface;
+import org.cricketmsf.sensesstation.out.OutbondHttpAdapterIface;
 import org.cricketmsf.sensesstation.out.TemperatureReaderIface;
 
 /**
@@ -45,7 +44,7 @@ public class Station extends Kernel {
     KeyValueCacheAdapterIface cache = null;
     SchedulerIface scheduler = null;
     // 
-    StoreClientIface storeClient = null;
+    OutbondHttpAdapterIface storeClient = null;
     TemperatureReaderIface temperatureReader = null;
 
     @Override
@@ -54,7 +53,7 @@ public class Station extends Kernel {
         httpAdapter = (HttpAdapterIface) getRegistered("EchoHttpAdapterIface");
         cache = (KeyValueCacheAdapterIface) getRegistered("KeyValueCacheAdapterIface");
         scheduler = (SchedulerIface) getRegistered("SchedulerIface");
-        storeClient = (StoreClientIface) getRegistered("StoreClient");
+        storeClient = (OutbondHttpAdapterIface) getRegistered("StoreClient");
         temperatureReader = (TemperatureReaderIface) getRegistered("TemperatureReader");
     }
 
@@ -111,11 +110,13 @@ public class Station extends Kernel {
         }
 
         ArrayList<TemperatureData> list = (ArrayList<TemperatureData>) ev.getPayload();
-        StoreResult result = storeClient.sendData(list);
+        storeClient.setContentType("text/csv");
+        storeClient.setRequestMethod("POST");
+        StandardResult result = (StandardResult)storeClient.send(list);
         if (result.getCode() != HttpAdapter.SC_CREATED) {
             ev.setTimePoint("+1m");
             handle(ev);
-            handle(Event.logInfo("SensesStation", result.getCode() + " " + result.getContent()));
+            handle(Event.logInfo("SensesStation", result.getCode() + " " + result.getPayload()));
         } else {
             handle(Event.logInfo("SensesStation", "data sended"));
         }

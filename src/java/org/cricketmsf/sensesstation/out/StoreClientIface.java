@@ -2,7 +2,7 @@
 package org.cricketmsf.sensesstation.out;
 
 import java.util.ArrayList;
-import org.cricketmsf.sensesservice.out.StoreResult;
+import org.cricketmsf.in.http.Result;
 import org.cricketmsf.sensesservice.out.TemperatureData;
 
 /**
@@ -11,6 +11,6 @@ import org.cricketmsf.sensesservice.out.TemperatureData;
  */
 public interface StoreClientIface {
 
-    public StoreResult sendData(ArrayList<TemperatureData> data);
+    public Result sendData(ArrayList<TemperatureData> data);
     
 }
