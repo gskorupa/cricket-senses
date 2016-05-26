@@ -15,33 +15,45 @@
  */
 package org.cricketmsf.sensesservice.out;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import org.cricketmsf.Event;
+import org.cricketmsf.Kernel;
 
 /**
  *
  * @author greg
  */
 public class TemperatureData {
-    
+
     private Date date;
     private Double temperature;
     private String sensorName;
-    private String clientIp;
+    private String stationIp;
+    private String stationName;
 
-    public TemperatureData(){
+    public TemperatureData() {
     }
-    
-    public TemperatureData(String sensor, String clientIp, String date, String temperature){
-        this.clientIp=clientIp;
-        sensorName=sensor;
-        this.date=new Date();
+
+    public TemperatureData(String stationName, String sensor, String stationIp, String date, String temperature) {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy:kk:mm:ss Z");
+        this.stationIp = stationIp;
+        sensorName = sensor;
+        this.stationName = stationName;
+        try {
+            this.date = sdf.parse(date);
+        } catch (ParseException e) {
+            Kernel.handle(Event.logWarning(this.getClass().getSimpleName(), e.getMessage()));
+            this.date=new Date();
+        }
         this.temperature = Double.valueOf(temperature);
     }
-    
+
     /*public String toPostParams(){
         return "sn="+getSensorName()+"&d="+getDate()+"&t="+getTemperature().toString();
     }
-    */
+     */
     /**
      * @return the date
      */
@@ -85,27 +97,44 @@ public class TemperatureData {
     }
 
     /**
-     * @return the clientIp
+     * @return the stationIp
      */
-    public String getClientIp() {
-        return clientIp;
+    public String getStationIp() {
+        return stationIp;
     }
 
     /**
-     * @param clientIp the clientIp to set
+     * @param stationIp the stationIp to set
      */
-    public void setClientIp(String clientIp) {
-        this.clientIp = clientIp;
+    public void setStationIp(String stationIp) {
+        this.stationIp = stationIp;
     }
-    
-    public String toString(){
-        StringBuffer sb=new StringBuffer();
+
+    public String toString() {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy:kk:mm:ss Z");
+        StringBuffer sb = new StringBuffer();
+        sb.append(getStationName());
+        sb.append(",");
         sb.append(getSensorName());
         sb.append(",");
-        sb.append(getDate());
+        sb.append(sdf.format(getDate()));
         sb.append(",");
         sb.append(getTemperature());
         return sb.toString();
     }
-    
+
+    /**
+     * @return the stationName
+     */
+    public String getStationName() {
+        return stationName;
+    }
+
+    /**
+     * @param stationName the stationName to set
+     */
+    public void setStationName(String stationName) {
+        this.stationName = stationName;
+    }
+
 }

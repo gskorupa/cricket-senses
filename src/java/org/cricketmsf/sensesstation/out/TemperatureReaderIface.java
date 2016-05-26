@@ -25,6 +25,6 @@ import org.cricketmsf.sensesservice.out.TemperatureData;
 public interface TemperatureReaderIface {
 
     public void configureSensors();
-    public TemperatureData read(String sensorData, String configuration) throws TemperatureReaderException;
-    public ArrayList<TemperatureData> readAll();
+    public TemperatureData read(String stationName, String sensorName, String configuration) throws TemperatureReaderException;
+    public ArrayList<TemperatureData> readAll(String stationName);
 }

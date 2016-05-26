@@ -17,6 +17,7 @@ package org.cricketmsf.sensesservice;
 
 import java.io.BufferedReader;
 import java.io.StringReader;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import org.cricketmsf.Event;
 import org.cricketmsf.EventHook;
@@ -28,6 +29,7 @@ import java.util.Map;
 import org.cricketmsf.in.http.EchoHttpAdapterIface;
 import org.cricketmsf.in.http.HtmlGenAdapterIface;
 import org.cricketmsf.in.http.HttpAdapter;
+import org.cricketmsf.in.http.HttpAdapterIface;
 import org.cricketmsf.in.http.StandardResult;
 import org.cricketmsf.in.scheduler.SchedulerIface;
 import org.cricketmsf.out.db.KeyValueCacheAdapterIface;
@@ -50,7 +52,7 @@ public class Service extends Kernel {
     HtmlGenAdapterIface htmlAdapter = null;
     HtmlReaderAdapterIface htmlReaderAdapter = null;
     // 
-    EchoHttpAdapterIface dataApi = null;
+    HttpAdapterIface dataApi = null;
 
     @Override
     public void getAdapters() {
@@ -60,7 +62,7 @@ public class Service extends Kernel {
         scheduler = (SchedulerIface) getRegistered("SchedulerIface");
         htmlAdapter = (HtmlGenAdapterIface) getRegistered("HtmlGenAdapterIface");
         htmlReaderAdapter = (HtmlReaderAdapterIface) getRegistered("HtmlReaderAdapterIface");
-        dataApi = (EchoHttpAdapterIface) getRegistered("DataAPI");
+        dataApi = (HttpAdapterIface) getRegistered("DataAPI");
     }
 
     /**
@@ -89,25 +91,26 @@ public class Service extends Kernel {
     }
 
     /**
-     * You can test this with:
-     * curl -X POST -d @filename.txt http://service:port/api --header "Content-Type:text/xml"
+     * You can test this with: curl -X POST -d @filename.txt
+     * http://service:port/api --header "Content-Type:text/xml"
+     *
      * @param requestEvent
-     * @return 
+     * @return
      */
     @HttpAdapterHook(adapterName = "DataAPI", requestMethod = "POST")
     public Object doStoreData(Event requestEvent) {
         // log event
         handle(Event.logInfo("SensesStore", "message received"));
-        
+
         StandardResult result = new StandardResult();
-        System.out.println((String)requestEvent.getRequestParameter("data"));
+        System.out.println((String) requestEvent.getRequestParameter("data"));
         try {
-            ArrayList<TemperatureData> tDataList = 
-                    parsePostData(
-                            (String)requestEvent.getRequestParameter("data"),
-                            ((RequestObject)requestEvent.getPayload()).clientIp);
+            ArrayList<TemperatureData> tDataList
+                    = parsePostData(
+                            (String) requestEvent.getRequestParameter("data"),
+                            ((RequestObject) requestEvent.getPayload()).clientIp);
             for (int i = 0; i < tDataList.size(); i++) {
-                dataStore.put("" + requestEvent.getId(), tDataList.get(i));
+                dataStore.put("" + Kernel.getEventId(), tDataList.get(i));
             }
             result.setCode(HttpAdapter.SC_CREATED);
         } catch (Exception e) {
@@ -119,11 +122,10 @@ public class Service extends Kernel {
 
     @HttpAdapterHook(adapterName = "DataAPI", requestMethod = "GET")
     public Object doGetData(Event requestEvent) {
-        
-                
+
         //get search query param
         String query = requestEvent.getRequestParameter("query");
-        if(query!=null){
+        if (query != null) {
             handle(Event.logWarning("ServiceStation", "query parameter not implemented"));
         }
         StandardResult result = new StandardResult();
@@ -147,25 +149,31 @@ public class Service extends Kernel {
 
     /**
      * Create List of Lists from Map. Used when text/csv response is required
+     *
      * @param data
      * @return List of Lists
      */
     ArrayList toArray(Map<String, TemperatureData> data) {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy:kk:mm:ss Z");
         ArrayList list = new ArrayList();
         ArrayList row = new ArrayList();
+        row.add("station");
         row.add("sensor");
         row.add("date");
         row.add("temperature");
+        row.add("IP");
         list.add(row);
         TemperatureData d;
         for (Map.Entry<String, TemperatureData> tempEntry : data.entrySet()) {
             row = new ArrayList();
-            //System.out.println(tempEntry.getValue().getSensorName());
+            //we can transform each parameter to String to force required format
             try {
                 d = tempEntry.getValue();
+                row.add(d.getStationName());
                 row.add(d.getSensorName());
-                row.add(d.getDate());
+                row.add(sdf.format(d.getDate()));
                 row.add(d.getTemperature());
+                row.add(d.getStationIp());
                 list.add(row);
             } catch (ClassCastException e) {
                 //db entry is not TemperatureData
@@ -209,8 +217,10 @@ public class Service extends Kernel {
                 line = line.trim();
                 if (!(line.isEmpty() || line.startsWith("#"))) {
                     arr = line.split(",");
-                    td = new TemperatureData(arr[0], clientIp, arr[1], arr[2]);
-                    list.add(td);
+                    if (arr.length >= 4) {
+                        td = new TemperatureData(arr[0], arr[1], clientIp, arr[2], arr[3]);
+                        list.add(td);
+                    }
                 }
             }
         } catch (Exception e) {

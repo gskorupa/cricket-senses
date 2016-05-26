@@ -23,7 +23,6 @@ import org.cricketmsf.Event;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.in.http.StandardResult;
 import org.cricketmsf.out.OutboundAdapter;
-import org.cricketmsf.sensesservice.out.StoreResult;
 import org.cricketmsf.sensesservice.out.TemperatureData;
 
 /**

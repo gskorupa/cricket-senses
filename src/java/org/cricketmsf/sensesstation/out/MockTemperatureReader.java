@@ -18,6 +18,7 @@ package org.cricketmsf.sensesstation.out;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Random;
 import org.cricketmsf.Adapter;
 import org.cricketmsf.Event;
 import org.cricketmsf.Kernel;
@@ -42,15 +43,15 @@ public class MockTemperatureReader extends OutboundAdapter implements Temperatur
     @Override
     public void configureSensors() {
         sensors = new HashMap<>();
-        sensors.put("s1", "");
+        sensors.put("t1", "");
+        sensors.put("t2", "");
     }
 
-    @Override
-    public ArrayList<TemperatureData> readAll() {
+    public ArrayList<TemperatureData> readAll(String stationName) {     
         ArrayList<TemperatureData> list = new ArrayList<>();
         sensors.keySet().stream().forEach((key) -> {
             try {
-                list.add(read(key, sensors.get(key)));
+                list.add(read(stationName, key, sensors.get(key)));
             } catch (TemperatureReaderException e) {
                 Kernel.handle(Event.logWarning(this.getClass().getSimpleName(), e.getMessage()));
             }
@@ -58,12 +59,13 @@ public class MockTemperatureReader extends OutboundAdapter implements Temperatur
         return list;
     }
 
-    @Override
-    public TemperatureData read(String sensorName, String config) throws TemperatureReaderException {
+    public TemperatureData read(String stationName, String sensorName, String config) throws TemperatureReaderException {
+        Random rand = new Random();
         TemperatureData td = new TemperatureData();
         td.setDate(new Date());
-        td.setSensorName("s1");
-        td.setTemperature(Double.valueOf("21.5"));
+        td.setStationName(stationName);
+        td.setSensorName(sensorName);
+        td.setTemperature(Double.valueOf("20.0")*rand.nextDouble());
         Kernel.handle(Event.logInfo("MockTemperatureReader", "sensor " + sensorName));
         return td;
     }

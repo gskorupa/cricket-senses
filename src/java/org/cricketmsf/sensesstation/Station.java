@@ -28,7 +28,7 @@ import org.cricketmsf.in.scheduler.SchedulerIface;
 import org.cricketmsf.out.db.KeyValueCacheAdapterIface;
 import org.cricketmsf.out.log.LoggerAdapterIface;
 import org.cricketmsf.sensesservice.out.TemperatureData;
-import org.cricketmsf.sensesstation.out.OutbondHttpAdapterIface;
+import org.cricketmsf.out.OutbondHttpAdapterIface;
 import org.cricketmsf.sensesstation.out.TemperatureReaderIface;
 
 /**
@@ -87,7 +87,7 @@ public class Station extends Kernel {
         }
 
         // read data
-        ArrayList<TemperatureData> data = temperatureReader.readAll();
+        ArrayList<TemperatureData> data = temperatureReader.readAll("stationName");
 
         // create event to store data
         Event ev = new Event("SensesStation", "senddata", "", null, data);
@@ -108,15 +108,17 @@ public class Station extends Kernel {
         if (scheduler.handleEvent(ev)) {
             return;
         }
-
+        // process event
         ArrayList<TemperatureData> list = (ArrayList<TemperatureData>) ev.getPayload();
         storeClient.setContentType("text/csv");
         storeClient.setRequestMethod("POST");
         StandardResult result = (StandardResult)storeClient.send(list);
+        // reschedule event in case of error
         if (result.getCode() != HttpAdapter.SC_CREATED) {
-            ev.setTimePoint("+1m");
-            handle(ev);
-            handle(Event.logInfo("SensesStation", result.getCode() + " " + result.getPayload()));
+            // try to send the data after 1 minute delay
+            //ev.setTimePoint("+1m");
+            //handle(ev);
+            handle(Event.logWarning("SensesStation", "rescheduling: "+result.getCode() + " " + result.getPayload()));
         } else {
             handle(Event.logInfo("SensesStation", "data sended"));
         }
