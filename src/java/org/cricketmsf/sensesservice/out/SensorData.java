@@ -18,42 +18,24 @@ package org.cricketmsf.sensesservice.out;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import org.cricketmsf.Event;
-import org.cricketmsf.Kernel;
+import org.cricketmsf.sensesstation.out.TemperatureReaderException;
 
 /**
  *
  * @author greg
  */
-public class TemperatureData {
+public class SensorData {
 
     private Date date;
-    private Double temperature;
+    private Double value;
     private String sensorName;
     private String stationIp;
     private String stationName;
+    private String unitName;
 
-    public TemperatureData() {
+    public SensorData() {
     }
 
-    public TemperatureData(String stationName, String sensor, String stationIp, String date, String temperature) {
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy:kk:mm:ss Z");
-        this.stationIp = stationIp;
-        sensorName = sensor;
-        this.stationName = stationName;
-        try {
-            this.date = sdf.parse(date);
-        } catch (ParseException e) {
-            Kernel.handle(Event.logWarning(this.getClass().getSimpleName(), e.getMessage()));
-            this.date=new Date();
-        }
-        this.temperature = Double.valueOf(temperature);
-    }
-
-    /*public String toPostParams(){
-        return "sn="+getSensorName()+"&d="+getDate()+"&t="+getTemperature().toString();
-    }
-     */
     /**
      * @return the date
      */
@@ -67,19 +49,34 @@ public class TemperatureData {
     public void setDate(Date date) {
         this.date = date;
     }
-
-    /**
-     * @return the temperature
-     */
-    public Double getTemperature() {
-        return temperature;
+    
+    public void setDate(String date) throws TemperatureReaderException {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy:kk:mm:ss Z");
+        try {
+            this.date = sdf.parse(date);
+        } catch (ParseException e) {
+            throw new TemperatureReaderException(
+                    TemperatureReaderException.DATE_FORMAT,
+                    "wrong date format: "+date);
+        }
     }
 
     /**
-     * @param temperature the temperature to set
+     * @return the value
      */
-    public void setTemperature(Double temperature) {
-        this.temperature = temperature;
+    public Double getValue() {
+        return value;
+    }
+
+    /**
+     * @param value the value to set
+     */
+    public void setValue(Double value) {
+        this.value = value;
+    }
+    
+    public void setTemperature(String temperature) throws NumberFormatException{
+        this.value = Double.valueOf(temperature);
     }
 
     /**
@@ -119,7 +116,9 @@ public class TemperatureData {
         sb.append(",");
         sb.append(sdf.format(getDate()));
         sb.append(",");
-        sb.append(getTemperature());
+        sb.append(getValue());
+        sb.append(",");
+        sb.append(getUnitName());
         return sb.toString();
     }
 
@@ -135,6 +134,20 @@ public class TemperatureData {
      */
     public void setStationName(String stationName) {
         this.stationName = stationName;
+    }
+
+    /**
+     * @return the unitName
+     */
+    public String getUnitName() {
+        return unitName;
+    }
+
+    /**
+     * @param unitName the unitName to set
+     */
+    public void setUnitName(String unitName) {
+        this.unitName = unitName;
     }
 
 }

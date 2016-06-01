@@ -23,7 +23,7 @@ import org.cricketmsf.Adapter;
 import org.cricketmsf.Event;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.out.OutboundAdapter;
-import org.cricketmsf.sensesservice.out.TemperatureData;
+import org.cricketmsf.sensesservice.out.SensorData;
 
 /**
  *
@@ -47,8 +47,8 @@ public class MockTemperatureReader extends OutboundAdapter implements Temperatur
         sensors.put("t2", "");
     }
 
-    public ArrayList<TemperatureData> readAll(String stationName) {     
-        ArrayList<TemperatureData> list = new ArrayList<>();
+    public ArrayList<SensorData> readAll(String stationName) {     
+        ArrayList<SensorData> list = new ArrayList<>();
         sensors.keySet().stream().forEach((key) -> {
             try {
                 list.add(read(stationName, key, sensors.get(key)));
@@ -59,15 +59,16 @@ public class MockTemperatureReader extends OutboundAdapter implements Temperatur
         return list;
     }
 
-    public TemperatureData read(String stationName, String sensorName, String config) throws TemperatureReaderException {
+    public SensorData read(String stationName, String sensorName, String config) throws TemperatureReaderException {
         Random rand = new Random();
-        TemperatureData td = new TemperatureData();
-        td.setDate(new Date());
-        td.setStationName(stationName);
-        td.setSensorName(sensorName);
-        td.setTemperature(Double.valueOf("20.0")*rand.nextDouble());
+        SensorData sed = new SensorData();
+        sed.setDate(new Date());
+        sed.setStationName(stationName);
+        sed.setSensorName(sensorName);
+        sed.setValue(Double.valueOf("20.0")*rand.nextDouble());
+        sed.setUnitName("C");
         Kernel.handle(Event.logInfo("MockTemperatureReader", "sensor " + sensorName));
-        return td;
+        return sed;
     }
 
 }

@@ -10,6 +10,8 @@ package org.cricketmsf.sensesstation.out;
  * @author greg
  */
 public class TemperatureReaderException extends Exception{
+    
+    public static final int DATE_FORMAT = 10;
     private int code;
     private String message;
     

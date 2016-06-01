@@ -35,7 +35,7 @@ import org.cricketmsf.in.scheduler.SchedulerIface;
 import org.cricketmsf.out.db.KeyValueCacheAdapterIface;
 import org.cricketmsf.out.html.HtmlReaderAdapterIface;
 import org.cricketmsf.out.log.LoggerAdapterIface;
-import org.cricketmsf.sensesservice.out.TemperatureData;
+import org.cricketmsf.sensesservice.out.SensorData;
 
 /**
  * EchoService
@@ -105,7 +105,7 @@ public class Service extends Kernel {
         StandardResult result = new StandardResult();
         System.out.println((String) requestEvent.getRequestParameter("data"));
         try {
-            ArrayList<TemperatureData> tDataList
+            ArrayList<SensorData> tDataList
                     = parsePostData(
                             (String) requestEvent.getRequestParameter("data"),
                             ((RequestObject) requestEvent.getPayload()).clientIp);
@@ -153,7 +153,7 @@ public class Service extends Kernel {
      * @param data
      * @return List of Lists
      */
-    ArrayList toArray(Map<String, TemperatureData> data) {
+    ArrayList toArray(Map<String, SensorData> data) {
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy:kk:mm:ss Z");
         ArrayList list = new ArrayList();
         ArrayList row = new ArrayList();
@@ -163,8 +163,8 @@ public class Service extends Kernel {
         row.add("temperature");
         row.add("IP");
         list.add(row);
-        TemperatureData d;
-        for (Map.Entry<String, TemperatureData> tempEntry : data.entrySet()) {
+        SensorData d;
+        for (Map.Entry<String, SensorData> tempEntry : data.entrySet()) {
             row = new ArrayList();
             //we can transform each parameter to String to force required format
             try {
@@ -172,11 +172,11 @@ public class Service extends Kernel {
                 row.add(d.getStationName());
                 row.add(d.getSensorName());
                 row.add(sdf.format(d.getDate()));
-                row.add(d.getTemperature());
+                row.add(d.getValue());
                 row.add(d.getStationIp());
                 list.add(row);
             } catch (ClassCastException e) {
-                //db entry is not TemperatureData
+                //db entry is not SensorData
             }
         }
         return list;
@@ -206,19 +206,25 @@ public class Service extends Kernel {
         }
     }
 
-    private ArrayList<TemperatureData> parsePostData(String postData, String clientIp) {
-        ArrayList<TemperatureData> list = new ArrayList<>();
+    private ArrayList<SensorData> parsePostData(String postData, String clientIp) {
+        ArrayList<SensorData> list = new ArrayList<>();
         BufferedReader bufReader = new BufferedReader(new StringReader(postData));
         String line = null;
         String[] arr;
-        TemperatureData td;
+        SensorData td;
         try {
             while ((line = bufReader.readLine()) != null) {
                 line = line.trim();
                 if (!(line.isEmpty() || line.startsWith("#"))) {
                     arr = line.split(",");
                     if (arr.length >= 4) {
-                        td = new TemperatureData(arr[0], arr[1], clientIp, arr[2], arr[3]);
+                        //td = new SensorData(arr[0], arr[1], clientIp, arr[2], arr[3]);
+                        td = new SensorData();
+                        td.setStationName(arr[0]);
+                        td.setSensorName(arr[1]);
+                        td.setStationIp(clientIp);
+                        td.setDate(arr[2]);
+                        td.setTemperature(arr[3]);
                         list.add(td);
                     }
                 }
