@@ -27,9 +27,9 @@ import org.cricketmsf.in.http.StandardResult;
 import org.cricketmsf.in.scheduler.SchedulerIface;
 import org.cricketmsf.out.db.KeyValueCacheAdapterIface;
 import org.cricketmsf.out.log.LoggerAdapterIface;
-import org.cricketmsf.sensesservice.out.TemperatureData;
-import org.cricketmsf.sensesstation.out.OutbondHttpAdapterIface;
 import org.cricketmsf.sensesstation.out.PiInfo;
+import org.cricketmsf.sensesservice.out.SensorData;
+import org.cricketmsf.out.OutbondHttpAdapterIface;
 import org.cricketmsf.sensesstation.out.TemperatureReaderIface;
 
 /**
@@ -42,7 +42,7 @@ public class Station extends Kernel {
     // adapterClasses
     LoggerAdapterIface logAdapter = null;
     HttpAdapterIface httpAdapter = null;
-    KeyValueCacheAdapterIface cache = null;
+    KeyValueCacheAdapterIface localDatabase = null;
     SchedulerIface scheduler = null;
     // 
     OutbondHttpAdapterIface storeClient = null;
@@ -52,7 +52,7 @@ public class Station extends Kernel {
     public void getAdapters() {
         logAdapter = (LoggerAdapterIface) getRegistered("LoggerAdapterIface");
         httpAdapter = (HttpAdapterIface) getRegistered("EchoHttpAdapterIface");
-        cache = (KeyValueCacheAdapterIface) getRegistered("KeyValueCacheAdapterIface");
+        localDatabase = (KeyValueCacheAdapterIface) getRegistered("KeyValueCacheAdapterIface");
         scheduler = (SchedulerIface) getRegistered("SchedulerIface");
         storeClient = (OutbondHttpAdapterIface) getRegistered("StoreClient");
         temperatureReader = (TemperatureReaderIface) getRegistered("TemperatureReader");
@@ -65,7 +65,7 @@ public class Station extends Kernel {
     public void runInitTasks() {
         if (!scheduler.isRestored()) {
             String delay = "+10s";
-            scheduler.handleEvent(new Event("SensesStation", "checksensors", "", delay, ""));
+            scheduler.handleEvent(new Event("SensesStation", "CheckSensors", "", delay, ""));
         }
     }
 
@@ -74,7 +74,7 @@ public class Station extends Kernel {
      *
      * @param event
      */
-    @EventHook(eventCategory = "checksensors")
+    @EventHook(eventCategory = "CheckSensors")
     public void checkSensors(Event event) {
 
         // if adapter is not defined then stop. There wont'be more iterations
@@ -88,17 +88,17 @@ public class Station extends Kernel {
         }
 
         // read data
-        ArrayList<TemperatureData> data = temperatureReader.readAll();
+        ArrayList<SensorData> data = temperatureReader.readAll("stationName");
 
         // create event to store data
-        Event ev = new Event("SensesStation", "senddata", "", null, data);
+        Event ev = new Event("SensesStation", "SendData", "", null, data);
         handle(ev);
 
         // schedule next run
-        handle(new Event("SensesStation", "checksensors", "", "+10s", ""));
+        handle(new Event("SensesStation", "CheckSensors", "", "+10s", ""));
     }
 
-    @EventHook(eventCategory = "senddata")
+    @EventHook(eventCategory = "SendData")
     public void sendToStore(Event ev) {
         // if adapter is not defined then stop. There wont'be more iterations
         if (storeClient == null) {
@@ -109,15 +109,20 @@ public class Station extends Kernel {
         if (scheduler.handleEvent(ev)) {
             return;
         }
-
-        ArrayList<TemperatureData> list = (ArrayList<TemperatureData>) ev.getPayload();
+        // process event
+        ArrayList<SensorData> list = (ArrayList<SensorData>) ev.getPayload();
         storeClient.setContentType("text/csv");
         storeClient.setRequestMethod("POST");
-        StandardResult result = (StandardResult) storeClient.send(list);
+
+        StandardResult result = (StandardResult)storeClient.send(list);
+        // in case of error we should store the data in local database
+        // to be able to resend it later
+
         if (result.getCode() != HttpAdapter.SC_CREATED) {
-            ev.setTimePoint("+1m");
-            handle(ev);
-            handle(Event.logInfo("SensesStation", result.getCode() + " " + result.getPayload()));
+            localDatabase.put(""+ev.getId(), list);
+            handle(Event.logWarning("SensesStation", "client error: "+result.getCode() +
+                    " "+ result.getPayload()
+            + " storing the data locally"));
         } else {
             handle(Event.logInfo("SensesStation", "data sended"));
         }

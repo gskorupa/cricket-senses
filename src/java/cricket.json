@@ -13,10 +13,11 @@
             "adapters": {
                 "DataAPI": {
                     "name": "DataAPI",
-                    "interfaceName": "EchoHttpAdapterIface",
-                    "classFullName": "org.cricketmsf.in.http.EchoHttpAdapter",
+                    "interfaceName": "HttpAdapterIface",
+                    "classFullName": "org.cricketmsf.in.http.SimpleHttpAdapter",
                     "properties": {
-                        "context": "/api"
+                        "context": "/api",
+                        "extended-response": "false"
                     }
                 },
                 "EchoHttpAdapterIface": {
@@ -89,9 +90,10 @@
                 "StoreClient": {
                     "name": "StoreClient",
                     "interfaceName": "OutboundHttpAdapterIface",
-                    "classFullName": "org.cricketmsf.sensesstation.out.OutbondHttpAdapter",
+                    "classFullName": "org.cricketmsf.out.OutbondHttpAdapter",
                     "properties": {
-                        "url": "http://localhost:8090/api"
+                        "url": "http://localhost:8090/api",
+                        "date-format": "dd/MM/yyyy:kk:mm:ss Z"
                     }
                 },
                 "TemperatureReader": {

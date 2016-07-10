@@ -4,3 +4,6 @@
 /build/web/WEB-INF/classes/cricket.json
 /nbproject/project.xml
 /nbproject/private/
+/build/web/WEB-INF/classes/org/cricketmsf/sensesstation/out/TemperatureReader.class
+/build/web/WEB-INF/classes/org/cricketmsf/sensesstation/out/PiInfo.class
+/lib/pi4j-core.jar

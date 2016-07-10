@@ -25,7 +25,7 @@ import org.cricketmsf.Adapter;
 import org.cricketmsf.Event;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.out.OutboundAdapter;
-import org.cricketmsf.sensesservice.out.TemperatureData;
+import org.cricketmsf.sensesservice.out.SensorData;
 import org.cricketmsf.sensesstation.GpioConfiguration;
 
 /**
@@ -61,11 +61,11 @@ public class TemperatureReader extends OutboundAdapter implements TemperatureRea
     }
 
     @Override
-    public ArrayList<TemperatureData> readAll() {
-        ArrayList<TemperatureData> list = new ArrayList<>();
+    public ArrayList<SensorData> readAll(String stationName) {
+        ArrayList<SensorData> list = new ArrayList<>();
         sensors.keySet().stream().forEach((key) -> {
             try {
-                list.add(read(key, sensors.get(key)));
+                list.add(read(stationName, key, sensors.get(key)));
             } catch (TemperatureReaderException e) {
                 Kernel.handle(Event.logWarning(this.getClass().getSimpleName(), e.getMessage()));
             }
@@ -74,7 +74,7 @@ public class TemperatureReader extends OutboundAdapter implements TemperatureRea
     }
 
     @Override
-    public TemperatureData read(String sensorName, GpioConfiguration config) throws TemperatureReaderException {
+    public SensorData read(String stationName, String sensorName, GpioConfiguration config) throws TemperatureReaderException {
         MCP3008GpioProvider provider;
         double analogValue = -1;
         try {
@@ -84,10 +84,11 @@ public class TemperatureReader extends OutboundAdapter implements TemperatureRea
             throw new TemperatureReaderException(TemperatureReaderException.IOEXCEPTION, "");
         }
         double tempValue = ((analogValue * 3300 / 1024) - 500) / 10;
-        TemperatureData td = new TemperatureData();
+        SensorData td = new SensorData();
+        td.setStationName(stationName);
         td.setDate(new Date());
         td.setSensorName(sensorName);
-        td.setTemperature(tempValue);
+        td.setTemperature(""+tempValue);
         Kernel.handle(Event.logInfo("TemperatureReader", "sensor " + sensorName));
         return td;
     }

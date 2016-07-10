@@ -23,8 +23,7 @@ import org.cricketmsf.Event;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.in.http.StandardResult;
 import org.cricketmsf.out.OutboundAdapter;
-import org.cricketmsf.sensesservice.out.StoreResult;
-import org.cricketmsf.sensesservice.out.TemperatureData;
+import org.cricketmsf.sensesservice.out.SensorData;
 
 /**
  *
@@ -42,7 +41,7 @@ public class MockStoreClient extends OutboundAdapter implements StoreClientIface
     }
 
     @Override
-    public StandardResult sendData(ArrayList<TemperatureData> data) {
+    public StandardResult sendData(ArrayList<SensorData> data) {
         long startPoint = System.currentTimeMillis();
         StandardResult result=new StandardResult();
         result.setCode(HttpURLConnection.HTTP_OK);

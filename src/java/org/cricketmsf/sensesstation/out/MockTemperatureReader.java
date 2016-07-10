@@ -18,12 +18,14 @@ package org.cricketmsf.sensesstation.out;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Random;
 import org.cricketmsf.Adapter;
 import org.cricketmsf.Event;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.out.OutboundAdapter;
-import org.cricketmsf.sensesservice.out.TemperatureData;
 import org.cricketmsf.sensesstation.GpioConfiguration;
+import org.cricketmsf.sensesservice.out.SensorData;
+
 
 /**
  *
@@ -48,6 +50,7 @@ public class MockTemperatureReader extends OutboundAdapter implements Temperatur
         String[] sensorsConf = configString.split(";");
         String[] params;
         sensors = new HashMap<>();
+
         for (int i = 0; i < sensorsConf.length; i++) {
             params = sensorsConf[i].split(",");
             try {
@@ -58,12 +61,11 @@ public class MockTemperatureReader extends OutboundAdapter implements Temperatur
         }
     }
 
-    @Override
-    public ArrayList<TemperatureData> readAll() {
-        ArrayList<TemperatureData> list = new ArrayList<>();
+    public ArrayList<SensorData> readAll(String stationName) {     
+        ArrayList<SensorData> list = new ArrayList<>();
         sensors.keySet().stream().forEach((key) -> {
             try {
-                list.add(read(key, sensors.get(key)));
+                list.add(read(stationName, key, sensors.get(key)));
             } catch (TemperatureReaderException e) {
                 Kernel.handle(Event.logWarning(this.getClass().getSimpleName(), e.getMessage()));
             }
@@ -71,14 +73,17 @@ public class MockTemperatureReader extends OutboundAdapter implements Temperatur
         return list;
     }
 
-    @Override
-    public TemperatureData read(String sensorName, GpioConfiguration config) throws TemperatureReaderException {
-        TemperatureData td = new TemperatureData();
-        td.setDate(new Date());
-        td.setSensorName(sensorName);
-        td.setTemperature(Double.valueOf("21.5"));
+
+    public SensorData read(String stationName, String sensorName, GpioConfiguration config) throws TemperatureReaderException {
+        Random rand = new Random();
+        SensorData sed = new SensorData();
+        sed.setDate(new Date());
+        sed.setStationName(stationName);
+        sed.setSensorName(sensorName);
+        sed.setValue(Double.valueOf("20.0")*rand.nextDouble());
+        sed.setUnitName("C");
         Kernel.handle(Event.logInfo("MockTemperatureReader", "sensor " + sensorName));
-        return td;
+        return sed;
     }
 
 }
