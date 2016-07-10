@@ -29,6 +29,7 @@ import org.cricketmsf.out.db.KeyValueCacheAdapterIface;
 import org.cricketmsf.out.log.LoggerAdapterIface;
 import org.cricketmsf.sensesservice.out.TemperatureData;
 import org.cricketmsf.sensesstation.out.OutbondHttpAdapterIface;
+import org.cricketmsf.sensesstation.out.PiInfo;
 import org.cricketmsf.sensesstation.out.TemperatureReaderIface;
 
 /**
@@ -112,7 +113,7 @@ public class Station extends Kernel {
         ArrayList<TemperatureData> list = (ArrayList<TemperatureData>) ev.getPayload();
         storeClient.setContentType("text/csv");
         storeClient.setRequestMethod("POST");
-        StandardResult result = (StandardResult)storeClient.send(list);
+        StandardResult result = (StandardResult) storeClient.send(list);
         if (result.getCode() != HttpAdapter.SC_CREATED) {
             ev.setTimePoint("+1m");
             handle(ev);
@@ -126,6 +127,11 @@ public class Station extends Kernel {
     public void runOnce() {
         super.runOnce();
         System.out.println("Hello from Senses Station");
+        try {
+            PiInfo.run();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @HttpAdapterHook(adapterName = "EchoHttpAdapterIface", requestMethod = "GET")

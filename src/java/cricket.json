@@ -97,8 +97,9 @@
                 "TemperatureReader": {
                     "name": "TemperatureReader",
                     "interfaceName": "TemperatureReaderIface",
-                    "classFullName": "org.cricketmsf.sensesstation.out.MockTemperatureReader",
+                    "classFullName": "org.cricketmsf.sensesstation.out.TemperatureReader",
                     "properties": {
+                        "sensors": "s0,0,0;s1,0,1"
                     }
                 },
                 "EchoHttpAdapterIface": {

@@ -17,6 +17,7 @@ package org.cricketmsf.sensesstation.out;
 
 import java.util.ArrayList;
 import org.cricketmsf.sensesservice.out.TemperatureData;
+import org.cricketmsf.sensesstation.GpioConfiguration;
 
 /**
  *
@@ -24,7 +25,7 @@ import org.cricketmsf.sensesservice.out.TemperatureData;
  */
 public interface TemperatureReaderIface {
 
-    public void configureSensors();
-    public TemperatureData read(String sensorData, String configuration) throws TemperatureReaderException;
+    public void configureSensors(String config);
+    public TemperatureData read(String sensorData, GpioConfiguration configuration) throws TemperatureReaderException;
     public ArrayList<TemperatureData> readAll();
 }

@@ -15,6 +15,9 @@
  */
 package org.cricketmsf.sensesstation.out;
 
+import com.pi4j.gpio.extension.mcp.MCP3008GpioProvider;
+import com.pi4j.gpio.extension.mcp.MCP3008Pin;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -29,7 +32,7 @@ import org.cricketmsf.sensesstation.GpioConfiguration;
  *
  * @author greg
  */
-public class MockTemperatureReader extends OutboundAdapter implements TemperatureReaderIface, Adapter {
+public class TemperatureReader extends OutboundAdapter implements TemperatureReaderIface, Adapter {
 
     HashMap<String, GpioConfiguration> sensors;
 
@@ -37,10 +40,9 @@ public class MockTemperatureReader extends OutboundAdapter implements Temperatur
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         //apiURL = properties.get("url");
         //System.out.println("url: " + apiURL);
-        //String sensorsConfig=properties.get("sensors");
-        String sensorsConfig="s0,0,0;s1,0,1";
-        System.out.println("sensors: "+sensorsConfig);
+        String sensorsConfig=properties.get("sensors");
         configureSensors(sensorsConfig);
+        System.out.println("sensors: "+sensorsConfig);
     }
 
     @Override
@@ -73,11 +75,20 @@ public class MockTemperatureReader extends OutboundAdapter implements Temperatur
 
     @Override
     public TemperatureData read(String sensorName, GpioConfiguration config) throws TemperatureReaderException {
+        MCP3008GpioProvider provider;
+        double analogValue = -1;
+        try {
+            provider = new MCP3008GpioProvider(config.spi);
+            analogValue = provider.getValue(MCP3008Pin.createAnalogInputPin(config.pin));
+        } catch (IOException e) {
+            throw new TemperatureReaderException(TemperatureReaderException.IOEXCEPTION, "");
+        }
+        double tempValue = ((analogValue * 3300 / 1024) - 500) / 10;
         TemperatureData td = new TemperatureData();
         td.setDate(new Date());
         td.setSensorName(sensorName);
-        td.setTemperature(Double.valueOf("21.5"));
-        Kernel.handle(Event.logInfo("MockTemperatureReader", "sensor " + sensorName));
+        td.setTemperature(tempValue);
+        Kernel.handle(Event.logInfo("TemperatureReader", "sensor " + sensorName));
         return td;
     }
 

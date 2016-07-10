@@ -10,6 +10,9 @@ package org.cricketmsf.sensesstation.out;
  * @author greg
  */
 public class TemperatureReaderException extends Exception{
+    
+    public static int IOEXCEPTION = 0;
+    
     private int code;
     private String message;
     
