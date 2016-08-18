@@ -6,4 +6,14 @@
 /nbproject/private/
 /build/web/WEB-INF/classes/org/cricketmsf/sensesstation/out/TemperatureReader.class
 /build/web/WEB-INF/classes/org/cricketmsf/sensesstation/out/PiInfo.class
-/lib/pi4j-core.jar
+/build/web/WEB-INF/classes/org/cricketmsf/sensesservice/out/SensorData.class
+/build/web/WEB-INF/classes/com/pi4j/gpio/extension/mcp/MCP3008Pin.class
+/build/web/WEB-INF/classes/org/cricketmsf/sensesstation/out/TemperatureReaderException.class
+/build/web/WEB-INF/classes/org/cricketmsf/sensesstation/out/TemperatureReaderIface.class
+/build/web/WEB-INF/classes/org/cricketmsf/sensesstation/out/MockTemperatureReader.class
+/build/web/WEB-INF/classes/org/cricketmsf/sensesstation/Station.class
+/build/web/WEB-INF/classes/org/cricketmsf/sensesstation/out/StoreClientIface.class
+/build/web/WEB-INF/classes/com/pi4j/gpio/extension/mcp/MCP3008GpioProvider.class
+/build/web/WEB-INF/classes/org/cricketmsf/sensesstation/out/MockStoreClient.class
+/build/web/WEB-INF/classes/org/cricketmsf/sensesservice/out/StoreResult.class
+/db/echo.xml
