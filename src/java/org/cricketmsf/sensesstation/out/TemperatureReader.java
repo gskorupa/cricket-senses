@@ -45,6 +45,12 @@ public class TemperatureReader extends OutboundAdapter implements TemperatureRea
         System.out.println("sensors: "+sensorsConfig);
     }
 
+    /**
+     * Stores sensor configurations for later use
+     * 
+     * @param configString must be in format "sensorName1,SPI_no1,PINno1;sensorName2,SPIno2,PINno2"
+     * example: "tempReader1,0,0;tempReader2,0,1"
+     */
     @Override
     public void configureSensors(String configString) {
         String[] sensorsConf = configString.split(";");
@@ -60,6 +66,12 @@ public class TemperatureReader extends OutboundAdapter implements TemperatureRea
         }
     }
 
+    /**
+     * Read analog data from all configured sensors
+     * 
+     * @param stationName
+     * @return list of SensorData objects
+     */
     @Override
     public ArrayList<SensorData> readAll(String stationName) {
         ArrayList<SensorData> list = new ArrayList<>();
@@ -73,6 +85,15 @@ public class TemperatureReader extends OutboundAdapter implements TemperatureRea
         return list;
     }
 
+    /**
+     * Read analog value from configured sensor
+     * 
+     * @param stationName
+     * @param sensorName
+     * @param config
+     * @return SensorData object
+     * @throws TemperatureReaderException 
+     */
     @Override
     public SensorData read(String stationName, String sensorName, GpioConfiguration config) throws TemperatureReaderException {
         MCP3008GpioProvider provider;
@@ -89,6 +110,7 @@ public class TemperatureReader extends OutboundAdapter implements TemperatureRea
         td.setDate(new Date());
         td.setSensorName(sensorName);
         td.setTemperature(""+tempValue);
+        td.setUnitName("Celsius");
         Kernel.handle(Event.logInfo("TemperatureReader", "sensor " + sensorName));
         return td;
     }

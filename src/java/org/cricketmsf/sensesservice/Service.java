@@ -33,9 +33,10 @@ import org.cricketmsf.in.http.HttpAdapterIface;
 import org.cricketmsf.in.http.StandardResult;
 import org.cricketmsf.in.scheduler.SchedulerIface;
 import org.cricketmsf.out.db.KeyValueCacheAdapterIface;
-import org.cricketmsf.out.html.HtmlReaderAdapterIface;
+import org.cricketmsf.out.file.FileReaderAdapterIface;
 import org.cricketmsf.out.log.LoggerAdapterIface;
 import org.cricketmsf.sensesservice.out.SensorData;
+import org.cricketmsf.sensesservice.out.SensorDataComparator;
 
 /**
  * EchoService
@@ -50,7 +51,7 @@ public class Service extends Kernel {
     KeyValueCacheAdapterIface dataStore = null;
     SchedulerIface scheduler = null;
     HtmlGenAdapterIface htmlAdapter = null;
-    HtmlReaderAdapterIface htmlReaderAdapter = null;
+    FileReaderAdapterIface htmlReaderAdapter = null;
     // 
     HttpAdapterIface dataApi = null;
 
@@ -61,7 +62,7 @@ public class Service extends Kernel {
         dataStore = (KeyValueCacheAdapterIface) getRegistered("KeyValueCacheAdapterIface");
         scheduler = (SchedulerIface) getRegistered("SchedulerIface");
         htmlAdapter = (HtmlGenAdapterIface) getRegistered("HtmlGenAdapterIface");
-        htmlReaderAdapter = (HtmlReaderAdapterIface) getRegistered("HtmlReaderAdapterIface");
+        htmlReaderAdapter = (FileReaderAdapterIface) getRegistered("HtmlReaderAdapterIface");
         dataApi = (HttpAdapterIface) getRegistered("DataAPI");
     }
 
@@ -123,15 +124,25 @@ public class Service extends Kernel {
     @HttpAdapterHook(adapterName = "DataAPI", requestMethod = "GET")
     public Object doGetData(Event requestEvent) {
 
-        //get search query param
-        String query = requestEvent.getRequestParameter("query");
-        if (query != null) {
-            handle(Event.logWarning("ServiceStation", "query parameter not implemented"));
+        String pathExt=requestEvent.getRequest().pathExt;
+        String stationName="";
+        if(!pathExt.isEmpty()){
+            int pos=pathExt.indexOf("/");
+            stationName=(pos>0?pathExt.substring(0,pos):pathExt);
         }
+        
+        //get search query param
+        //String query = requestEvent.getRequestParameter("query");
+        //if (query != null) {
+        //    handle(Event.logWarning("ServiceStation", "query parameter not implemented"));
+        //}
+                
         StandardResult result = new StandardResult();
         try {
             RequestObject request = (RequestObject) requestEvent.getPayload();
-            Map data = dataStore.getAll();
+            SensorData pattern = new SensorData();
+            pattern.setStationName(stationName);
+            Map data = dataStore.search(new SensorDataComparator(), pattern);
             String format = request.headers.getFirst("Accept").toLowerCase();
             switch (format) {
                 case "text/csv":

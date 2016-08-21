@@ -101,7 +101,7 @@
                     "interfaceName": "TemperatureReaderIface",
                     "classFullName": "org.cricketmsf.sensesstation.out.TemperatureReader",
                     "properties": {
-                        "sensors": "s0,0,0;s1,0,1"
+                        "sensors": "temperatureSensor0,0,0;temperatureSensor1,0,1"
                     }
                 },
                 "EchoHttpAdapterIface": {

@@ -65,12 +65,15 @@ public class Station extends Kernel {
     public void runInitTasks() {
         if (!scheduler.isRestored()) {
             String delay = "+10s";
+            // schedule reading sensors every 10 seconds
             scheduler.handleEvent(new Event("SensesStation", "CheckSensors", "", delay, ""));
+            // schedule resending data stored locally (because of errors) every hour
+            scheduler.handleEvent(new Event("SensesStation", "resend", "", "+60m", ""));
         }
     }
 
     /**
-     * Reads temperature data from sensors using temperatureReader adapter
+     * Read temperature data from sensors using temperatureReader adapter
      *
      * @param event
      */
@@ -98,6 +101,11 @@ public class Station extends Kernel {
         handle(new Event("SensesStation", "CheckSensors", "", "+10s", ""));
     }
 
+    /**
+     * Handle SendData event by sending sensor data to the store using storeClient adapter.
+     * 
+     * @param ev event to handle
+     */
     @EventHook(eventCategory = "SendData")
     public void sendToStore(Event ev) {
         // if adapter is not defined then stop. There wont'be more iterations
@@ -115,10 +123,9 @@ public class Station extends Kernel {
         storeClient.setRequestMethod("POST");
 
         StandardResult result = (StandardResult)storeClient.send(list);
-        // in case of error we should store the data in local database
-        // to be able to resend it later
-
         if (result.getCode() != HttpAdapter.SC_CREATED) {
+            // in case of error we should store the data in local database
+            // to be able to resend it later: TODO
             localDatabase.put(""+ev.getId(), list);
             handle(Event.logWarning("SensesStation", "client error: "+result.getCode() +
                     " "+ result.getPayload()
@@ -126,6 +133,12 @@ public class Station extends Kernel {
         } else {
             handle(Event.logInfo("SensesStation", "data sended"));
         }
+    }
+    
+    @EventHook(eventCategory = "resend")
+    public void resendCachedData(Event event) {
+        // TODO
+        // read data from local cache and send using storeClient
     }
 
     @Override
