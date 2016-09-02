@@ -16,7 +16,7 @@
 package org.cricketmsf.sensesstation.out;
 
 import java.util.ArrayList;
-import org.cricketmsf.sensesstation.GpioConfiguration;
+import org.cricketmsf.raspberry.GpioConfiguration;
 import org.cricketmsf.sensesservice.out.SensorData;
 
 /**

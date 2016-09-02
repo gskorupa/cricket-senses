@@ -27,7 +27,7 @@ import org.cricketmsf.in.http.StandardResult;
 import org.cricketmsf.in.scheduler.SchedulerIface;
 import org.cricketmsf.out.db.KeyValueCacheAdapterIface;
 import org.cricketmsf.out.log.LoggerAdapterIface;
-import org.cricketmsf.sensesstation.out.PiInfo;
+import org.cricketmsf.raspberry.PiInfo;
 import org.cricketmsf.sensesservice.out.SensorData;
 import org.cricketmsf.out.OutbondHttpAdapterIface;
 import org.cricketmsf.sensesstation.out.TemperatureReaderIface;
@@ -63,12 +63,18 @@ public class Station extends Kernel {
      */
     @Override
     public void runInitTasks() {
+        System.out.println("Senses Station name=="+getProperties().get("name")+" is ready");
         if (!scheduler.isRestored()) {
             String delay = "+10s";
             // schedule reading sensors every 10 seconds
             scheduler.handleEvent(new Event("SensesStation", "CheckSensors", "", delay, ""));
             // schedule resending data stored locally (because of errors) every hour
-            scheduler.handleEvent(new Event("SensesStation", "resend", "", "+60m", ""));
+            scheduler.handleEvent(
+                    new Event("SensesStation", 
+                            "resend", "", 
+                            getProperties().getOrDefault("resend-interval", "+30m"), 
+                            "")
+            );
         }
     }
 
@@ -91,14 +97,20 @@ public class Station extends Kernel {
         }
 
         // read data
-        ArrayList<SensorData> data = temperatureReader.readAll("stationName");
+        ArrayList<SensorData> data = temperatureReader.readAll(getProperties().getOrDefault("station-name","testStation"));
 
         // create event to store data
         Event ev = new Event("SensesStation", "SendData", "", null, data);
         handle(ev);
 
         // schedule next run
-        handle(new Event("SensesStation", "CheckSensors", "", "+10s", ""));
+        handle(
+                new Event("SensesStation", 
+                        "CheckSensors", 
+                        "", 
+                        getProperties().getOrDefault("sampling-interval", "+30s"), 
+                        "")
+        );
     }
 
     /**
@@ -119,9 +131,10 @@ public class Station extends Kernel {
         }
         // process event
         ArrayList<SensorData> list = (ArrayList<SensorData>) ev.getPayload();
+        
+        // to store new data we need to acces SensesStore API (POST request with csv data)
         storeClient.setContentType("text/csv");
         storeClient.setRequestMethod("POST");
-
         StandardResult result = (StandardResult)storeClient.send(list);
         if (result.getCode() != HttpAdapter.SC_CREATED) {
             // in case of error we should store the data in local database
@@ -144,7 +157,7 @@ public class Station extends Kernel {
     @Override
     public void runOnce() {
         super.runOnce();
-        System.out.println("Hello from Senses Station");
+        System.out.println("Hello from Senses Station "+getProperties().getOrDefault("name","testStation"));
         try {
             PiInfo.run();
         } catch (Exception e) {

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.cricketmsf.sensesstation.out;
+package org.cricketmsf.raspberry.out;
 
 import com.pi4j.gpio.extension.mcp.MCP3008GpioProvider;
 import com.pi4j.gpio.extension.mcp.MCP3008Pin;
@@ -26,13 +26,15 @@ import org.cricketmsf.Event;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.out.OutboundAdapter;
 import org.cricketmsf.sensesservice.out.SensorData;
-import org.cricketmsf.sensesstation.GpioConfiguration;
+import org.cricketmsf.raspberry.GpioConfiguration;
+import org.cricketmsf.sensesstation.out.TemperatureReaderException;
+import org.cricketmsf.sensesstation.out.TemperatureReaderIface;
 
 /**
  *
  * @author greg
  */
-public class TemperatureReader extends OutboundAdapter implements TemperatureReaderIface, Adapter {
+public class Tmp36Reader extends OutboundAdapter implements TemperatureReaderIface, Adapter {
 
     HashMap<String, GpioConfiguration> sensors;
 
@@ -104,15 +106,18 @@ public class TemperatureReader extends OutboundAdapter implements TemperatureRea
         } catch (IOException e) {
             throw new TemperatureReaderException(TemperatureReaderException.IOEXCEPTION, "");
         }
-        double tempValue = ((analogValue * 3300 / 1024) - 500) / 10;
         SensorData td = new SensorData();
         td.setStationName(stationName);
         td.setDate(new Date());
         td.setSensorName(sensorName);
-        td.setTemperature(""+tempValue);
+        td.setTemperature(""+recalculate(analogValue));
         td.setUnitName("Celsius");
         Kernel.handle(Event.logInfo("TemperatureReader", "sensor " + sensorName));
         return td;
+    }
+    
+    private double recalculate(double value){
+        return ((value * 3300 / 1024) - 500) / 10;
     }
 
 }

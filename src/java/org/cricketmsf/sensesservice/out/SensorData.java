@@ -109,7 +109,7 @@ public class SensorData {
 
     public String toString() {
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy:kk:mm:ss Z");
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append(getStationName());
         sb.append(",");
         sb.append(getSensorName());

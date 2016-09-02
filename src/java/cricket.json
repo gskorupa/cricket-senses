@@ -35,7 +35,7 @@
                     "properties": {
                         "name": "EchoService",
                         "level": "ALL",
-                        "log-file-name": "./log/store.log"
+                        "log-file-name": "./data/store.log"
                     }
                 },
                 "KeyValueCacheAdapterIface": {
@@ -43,10 +43,10 @@
                     "interfaceName": "KeyValueCacheAdapterIface",
                     "classFullName": "org.cricketmsf.out.db.KeyValueStore",
                     "properties": {
-                        "path": "./db",
+                        "path": "./data",
                         "envVariable": "ECHO_DB_PATH",
                         "file": "echo.xml",
-                        "max-records": "10",
+                        "max-records": "100",
                         "persistent": "true"
                     }
                 },
@@ -55,15 +55,15 @@
                     "interfaceName": "SchedulerIface",
                     "classFullName": "org.cricketmsf.in.scheduler.Scheduler",
                     "properties": {
-                        "path": "./db",
+                        "path": "./data",
                         "envVariable": "SCHEDULER_DB_PATH",
                         "file": "scheduler.xml"
                     }
                 },
-                "HtmlReaderAdapterIface": {
-                    "name": "HtmlReaderAdapterIface",
-                    "interfaceName": "HtmlReaderAdapterIface",
-                    "classFullName": "org.cricketmsf.out.html.HtmlReaderAdapter",
+                "FileReaderAdapterIface": {
+                    "name": "FileReaderAdapterIface",
+                    "interfaceName": "FileReaderAdapterIface",
+                    "classFullName": "org.cricketmsf.out.file.FileReaderAdapter",
                     "properties": {
                         "root": "./www/"
                     }
@@ -86,22 +86,29 @@
             "port": "8080",
             "threads": 0,
             "filter": "org.cricketmsf.SecurityFilter",
+            "properties": {
+                "station-name": "homestation1",
+                "sampling-interval": "+30s",
+                "resend-interval": "+30m"
+            },
             "adapters": {
                 "StoreClient": {
                     "name": "StoreClient",
                     "interfaceName": "OutboundHttpAdapterIface",
                     "classFullName": "org.cricketmsf.out.OutbondHttpAdapter",
                     "properties": {
-                        "url": "http://localhost:8090/api",
+                        "#url": "http://localhost:8090/api",
+                        "url": "http://sensesstore.unicloud.pl/api",
                         "date-format": "dd/MM/yyyy:kk:mm:ss Z"
                     }
                 },
                 "TemperatureReader": {
                     "name": "TemperatureReader",
                     "interfaceName": "TemperatureReaderIface",
-                    "classFullName": "org.cricketmsf.sensesstation.out.TemperatureReader",
+                    "classFullName": "org.cricketmsf.raspberry.out.Tmp36Reader",
+                    "#classFullName": "org.cricketmsf.sensesstation.out.MockTemperatureReader",
                     "properties": {
-                        "sensors": "temperatureSensor0,0,0;temperatureSensor1,0,1"
+                        "sensors": "temp1,0,0;temp2,0,1"
                     }
                 },
                 "EchoHttpAdapterIface": {
@@ -119,7 +126,7 @@
                     "properties": {
                         "name": "EchoService",
                         "level": "ALL",
-                        "log-file-name": "./log/cricket.log"
+                        "log-file-name": "./data/cricket.log"
                     }
                 },
                 "KeyValueCacheAdapterIface": {
@@ -127,7 +134,7 @@
                     "interfaceName": "KeyValueCacheAdapterIface",
                     "classFullName": "org.cricketmsf.out.db.KeyValueStore",
                     "properties": {
-                        "path": "./db",
+                        "path": "./data",
                         "envVariable": "ECHO_DB_PATH",
                         "file": "echo.xml",
                         "max-records": "100",
@@ -139,7 +146,7 @@
                     "interfaceName": "SchedulerIface",
                     "classFullName": "org.cricketmsf.in.scheduler.Scheduler",
                     "properties": {
-                        "path": "./db",
+                        "path": "./data",
                         "envVariable": "SCHEDULER_DB_PATH",
                         "file": "scheduler.xml"
                     }

@@ -1,4 +1,4 @@
-package org.cricketmsf.sensesstation.out;
+package org.cricketmsf.raspberry;
 
 import com.pi4j.system.NetworkInfo;
 import com.pi4j.system.SystemInfo;

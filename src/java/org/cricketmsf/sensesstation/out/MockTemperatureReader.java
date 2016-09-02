@@ -23,7 +23,7 @@ import org.cricketmsf.Adapter;
 import org.cricketmsf.Event;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.out.OutboundAdapter;
-import org.cricketmsf.sensesstation.GpioConfiguration;
+import org.cricketmsf.raspberry.GpioConfiguration;
 import org.cricketmsf.sensesservice.out.SensorData;
 
 

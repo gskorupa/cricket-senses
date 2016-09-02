@@ -25,6 +25,7 @@ import org.cricketmsf.HttpAdapterHook;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.RequestObject;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.cricketmsf.in.http.EchoHttpAdapterIface;
 import org.cricketmsf.in.http.HtmlGenAdapterIface;
@@ -62,7 +63,7 @@ public class Service extends Kernel {
         dataStore = (KeyValueCacheAdapterIface) getRegistered("KeyValueCacheAdapterIface");
         scheduler = (SchedulerIface) getRegistered("SchedulerIface");
         htmlAdapter = (HtmlGenAdapterIface) getRegistered("HtmlGenAdapterIface");
-        htmlReaderAdapter = (FileReaderAdapterIface) getRegistered("HtmlReaderAdapterIface");
+        htmlReaderAdapter = (FileReaderAdapterIface) getRegistered("FileReaderAdapterIface");
         dataApi = (HttpAdapterIface) getRegistered("DataAPI");
     }
 
@@ -104,7 +105,13 @@ public class Service extends Kernel {
         handle(Event.logInfo("SensesStore", "message received"));
 
         StandardResult result = new StandardResult();
-        System.out.println((String) requestEvent.getRequestParameter("data"));
+        Event.logFinest("SensesStore", (String) requestEvent.getRequestParameter("data"));
+        
+        if(!"text/csv".equalsIgnoreCase(((RequestObject) requestEvent.getPayload()).headers.getFirst("Content-Type"))){
+            result.setCode(HttpAdapter.SC_BAD_REQUEST);
+            result.setMessage("Request Content-Type must be text/csv");
+            return result;
+        }
         try {
             ArrayList<SensorData> tDataList
                     = parsePostData(
@@ -115,8 +122,9 @@ public class Service extends Kernel {
             }
             result.setCode(HttpAdapter.SC_CREATED);
         } catch (Exception e) {
-            e.printStackTrace();
+            Event.logWarning("SensesStore", e.getMessage());
             result.setCode(HttpAdapter.SC_INTERNAL_SERVER_ERROR);
+            result.setMessage(e.getMessage());
         }
         return result;
     }
@@ -124,9 +132,9 @@ public class Service extends Kernel {
     @HttpAdapterHook(adapterName = "DataAPI", requestMethod = "GET")
     public Object doGetData(Event requestEvent) {
 
-        String pathExt=requestEvent.getRequest().pathExt;
+        String pathExt=((RequestObject) requestEvent.getPayload()).pathExt;
         String stationName="";
-        if(!pathExt.isEmpty()){
+        if(pathExt!=null && !pathExt.isEmpty()){
             int pos=pathExt.indexOf("/");
             stationName=(pos>0?pathExt.substring(0,pos):pathExt);
         }
@@ -140,10 +148,19 @@ public class Service extends Kernel {
         StandardResult result = new StandardResult();
         try {
             RequestObject request = (RequestObject) requestEvent.getPayload();
+            
+            
+            // prepare search pattern
             SensorData pattern = new SensorData();
             pattern.setStationName(stationName);
-            Map data = dataStore.search(new SensorDataComparator(), pattern);
-            String format = request.headers.getFirst("Accept").toLowerCase();
+            
+            // search for data by a station name (using the pattern)
+            List data = dataStore.search(new SensorDataComparator(), pattern);
+            
+            String format = request.headers.getFirst("Accept");
+            if(format==null){
+                format="";
+            }
             switch (format) {
                 case "text/csv":
                     result.setData(toArray(data));
@@ -164,7 +181,7 @@ public class Service extends Kernel {
      * @param data
      * @return List of Lists
      */
-    ArrayList toArray(Map<String, SensorData> data) {
+    ArrayList toArray(List<SensorData> data) {
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy:kk:mm:ss Z");
         ArrayList list = new ArrayList();
         ArrayList row = new ArrayList();
@@ -175,11 +192,11 @@ public class Service extends Kernel {
         row.add("IP");
         list.add(row);
         SensorData d;
-        for (Map.Entry<String, SensorData> tempEntry : data.entrySet()) {
+        for (int i=0; i<data.size(); i++) {
             row = new ArrayList();
             //we can transform each parameter to String to force required format
             try {
-                d = tempEntry.getValue();
+                d = data.get(i);
                 row.add(d.getStationName());
                 row.add(d.getSensorName());
                 row.add(sdf.format(d.getDate()));
@@ -220,7 +237,7 @@ public class Service extends Kernel {
     private ArrayList<SensorData> parsePostData(String postData, String clientIp) {
         ArrayList<SensorData> list = new ArrayList<>();
         BufferedReader bufReader = new BufferedReader(new StringReader(postData));
-        String line = null;
+        String line;
         String[] arr;
         SensorData td;
         try {
@@ -228,7 +245,7 @@ public class Service extends Kernel {
                 line = line.trim();
                 if (!(line.isEmpty() || line.startsWith("#"))) {
                     arr = line.split(",");
-                    if (arr.length >= 4) {
+                    if (arr.length >= 5) {
                         //td = new SensorData(arr[0], arr[1], clientIp, arr[2], arr[3]);
                         td = new SensorData();
                         td.setStationName(arr[0]);
@@ -236,12 +253,13 @@ public class Service extends Kernel {
                         td.setStationIp(clientIp);
                         td.setDate(arr[2]);
                         td.setTemperature(arr[3]);
+                        td.setUnitName(arr[4]);
                         list.add(td);
                     }
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Event.logWarning("SensesStore", e.getMessage());
         }
         return list;
     }

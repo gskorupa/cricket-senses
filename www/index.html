@@ -29,47 +29,13 @@
                 font-size: 75%;
             }
         </style>
-        <script>
-            $(document).ready(function () {
-                sendRequest();
-            });
-
-            function sendRequest() {
-                $.ajax({
-                    url: "/echo",
-                    data: {
-                        name: "John",
-                        surname: "Smith"
-                    },
-                    type: "GET",
-                    dataType: "json",
-                    success: function (json) {
-                        modifyContent(json);
-                    }
-                });
-            }
-            ;
-
-            function modifyContent(jsonObject) {
-                $("#name").html(jsonObject.data.name);
-                $("#surname").html(jsonObject.data.surname);
-                $("#code").html(jsonObject.code);
-            }
-            ;
-        </script>
+        
     </head>
     <body>
         <div>
-            <h1>Echo service</h1>
-            <h5>Web GUI example</h5>
-        </div>
-        <div>
-            <table>
-                <tr><th>Paremeter name</th><th>Value</th></tr>
-                <tr><td>data.name:</td><td id="name"></td></tr>
-                <tr><td>data.surname:</td><td id="surname"></td></tr>
-                <tr><td>response code:</td><td id="code"></td></tr>
-            </table>
+            <h1>Senses Service</h1>
+            <h2>Store</h2>
+            <h5>&copy; 2016, Grzegorz Skorupa</h5>
         </div>
         <div>
             <footer>Build with <a href="https://github.com/gskorupa/cricket-starter">Cricket Microservices Framework</a></footer>

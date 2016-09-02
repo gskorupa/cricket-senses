@@ -17,3 +17,15 @@
 /build/web/WEB-INF/classes/org/cricketmsf/sensesstation/out/MockStoreClient.class
 /build/web/WEB-INF/classes/org/cricketmsf/sensesservice/out/StoreResult.class
 /db/echo.xml
+/data/store.log.lck
+/build/web/WEB-INF/classes/org/cricketmsf/raspberry/out/Tmp36Reader.class
+/build/web/WEB-INF/classes/Station-help.txt
+/data/readme.txt
+/data/store.log
+/data/cricket.log
+/build/web/WEB-INF/classes/org/cricketmsf/raspberry/PiInfo.class
+/build/web/WEB-INF/classes/org/cricketmsf/raspberry/GpioConfiguration.class
+/data/echo.xml
+/dist/sensesservice-1.0.1.jar
+/data/scheduler.xml
+/dist/sensesservice-1.0.2.jar

@@ -1,7 +1,7 @@
 
 Usage: java -jar sensesservice-1.0.0.jar [options]
 
-Runs the Senses Store service in standalone mode.
+Runs the Senses Station service in standalone mode.
 
 Options:
 --help | -h                Print this usage information and exit
