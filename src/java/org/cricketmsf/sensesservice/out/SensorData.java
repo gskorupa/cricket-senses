@@ -16,8 +16,8 @@
 package org.cricketmsf.sensesservice.out;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
+import org.cricketmsf.Kernel;
 import org.cricketmsf.sensesstation.out.TemperatureReaderException;
 
 /**
@@ -51,9 +51,10 @@ public class SensorData {
     }
     
     public void setDate(String date) throws TemperatureReaderException {
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy:kk:mm:ss Z");
+        //SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy:kk:mm:ss Z");
         try {
-            this.date = sdf.parse(date);
+            //this.date = sdf.parse(date);
+            this.date=Kernel.getInstance().dateFormat.parse(date);
         } catch (ParseException e) {
             throw new TemperatureReaderException(
                     TemperatureReaderException.DATE_FORMAT,
@@ -108,13 +109,14 @@ public class SensorData {
     }
 
     public String toString() {
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy:kk:mm:ss Z");
+        //SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy:kk:mm:ss Z");
         StringBuilder sb = new StringBuilder();
         sb.append(getStationName());
         sb.append(",");
         sb.append(getSensorName());
         sb.append(",");
-        sb.append(sdf.format(getDate()));
+        //sb.append(sdf.format(getDate()));
+        sb.append(Kernel.getInstance().dateFormat.format(getDate()));
         sb.append(",");
         sb.append(getValue());
         sb.append(",");

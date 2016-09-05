@@ -10,6 +10,9 @@
             "port": "8090",
             "threads": 0,
             "filter": "org.cricketmsf.SecurityFilter",
+            "properties": {
+                "time-zone": "GMT"
+            },
             "adapters": {
                 "DataAPI": {
                     "name": "DataAPI",
@@ -89,7 +92,8 @@
             "properties": {
                 "station-name": "homestation1",
                 "sampling-interval": "+30s",
-                "resend-interval": "+30m"
+                "resend-interval": "+30m",
+                "time-zone": "GMT"
             },
             "adapters": {
                 "StoreClient": {

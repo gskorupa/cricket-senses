@@ -17,7 +17,6 @@ package org.cricketmsf.sensesservice;
 
 import java.io.BufferedReader;
 import java.io.StringReader;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import org.cricketmsf.Event;
 import org.cricketmsf.EventHook;
@@ -26,7 +25,6 @@ import org.cricketmsf.Kernel;
 import org.cricketmsf.RequestObject;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import org.cricketmsf.in.http.EchoHttpAdapterIface;
 import org.cricketmsf.in.http.HtmlGenAdapterIface;
 import org.cricketmsf.in.http.HttpAdapter;
@@ -182,7 +180,7 @@ public class Service extends Kernel {
      * @return List of Lists
      */
     ArrayList toArray(List<SensorData> data) {
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy:kk:mm:ss Z");
+        //SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy:kk:mm:ss Z");
         ArrayList list = new ArrayList();
         ArrayList row = new ArrayList();
         row.add("station");
@@ -199,7 +197,8 @@ public class Service extends Kernel {
                 d = data.get(i);
                 row.add(d.getStationName());
                 row.add(d.getSensorName());
-                row.add(sdf.format(d.getDate()));
+                //row.add(sdf.format(d.getDate()));
+                row.add(Kernel.getInstance().dateFormat.format(d.getDate()));
                 row.add(d.getValue());
                 row.add(d.getStationIp());
                 list.add(row);
